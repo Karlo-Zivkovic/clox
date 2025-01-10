@@ -1,5 +1,6 @@
 #include "chunk.h"
 #include "memory.h"
+#include <stdlib.h>
 
 void initChunk(Chunk *chunk) {
   chunk->count = 0;
@@ -16,4 +17,9 @@ void writeChunk(Chunk *chunk, uint8_t byte) {
   }
   chunk->code[chunk->count] = byte;
   chunk->count++;
+}
+
+void freeChunk(Chunk *chunk) {
+  FREE_ARRAY(uint8_t, chunk->code, chunk->capacity);
+  initChunk(chunk);
 }
