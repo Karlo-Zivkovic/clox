@@ -23,12 +23,25 @@ static int constantInstruction(const char *name, Chunk *chunk, int offset) {
   return offset + 2;
 }
 
+static int getLine(Chunk *chunk, int instructionIndex) {
+  int instructionCount = 0;
+
+  for (int i = 0; i < chunk->linesCount; i++) {
+    instructionCount += chunk->lines[i].runLength;
+    if (instructionIndex < instructionCount) {
+      return chunk->lines[i].line;
+    }
+  }
+  return -1;
+}
+
 int disassembleInstruction(Chunk *chunk, int offset) {
   printf("%04d ", offset);
-  if (offset > 0 && chunk->lines[offset] == chunk->lines[offset - 1]) {
+  if (offset > 0 &&
+      getLine(chunk, offset) == chunk->lines[chunk->linesCount - 1].line) {
     printf("   | ");
   } else {
-    printf("%4d ", chunk->lines[offset]);
+    printf("%4d ", getLine(chunk, offset));
   }
 
   uint8_t instruction = chunk->code[offset];
@@ -39,6 +52,17 @@ int disassembleInstruction(Chunk *chunk, int offset) {
     return simpleInstruction("OP_RETURN", offset);
   default:
     printf("Unknown opcode %d\n", instruction);
-    return offset + 1;
+    return offset + 2;
+  }
+}
+
+const char *getOpcodeName(uint8_t opcode) {
+  switch (opcode) {
+  case OP_CONSTANT:
+    return "OP_CONSTANT";
+  case OP_RETURN:
+    return "OP_RETURN";
+  default:
+    return "UNKNOWN_OPCODE";
   }
 }
