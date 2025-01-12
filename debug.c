@@ -23,6 +23,16 @@ static int constantInstruction(const char *name, Chunk *chunk, int offset) {
   return offset + 2;
 }
 
+static int constantLongInstruction(const char *name, Chunk *chunk, int offset) {
+  uint32_t index = (chunk->code[offset + 1] << 16) |
+                   (chunk->code[offset + 2] << 8) | chunk->code[offset + 3];
+  printf("%-16s %4d '", name, index);
+  printValue(chunk->constants.values[index]);
+  printf("'\n");
+
+  return offset + 4; // Advance by 1 opcode byte + 3 operand bytes.
+}
+
 static int getLine(Chunk *chunk, int instructionIndex) {
   int instructionCount = 0;
 
@@ -38,7 +48,8 @@ static int getLine(Chunk *chunk, int instructionIndex) {
 int disassembleInstruction(Chunk *chunk, int offset) {
   printf("%04d ", offset);
   if (offset > 0 &&
-      getLine(chunk, offset) == chunk->lines[chunk->linesCount - 1].line) {
+      // getLine(chunk, offset) == chunk->lines[chunk->linesCount - 1].line) {
+      getLine(chunk, offset) == getLine(chunk, offset - 1)) {
     printf("   | ");
   } else {
     printf("%4d ", getLine(chunk, offset));
@@ -48,6 +59,8 @@ int disassembleInstruction(Chunk *chunk, int offset) {
   switch (instruction) {
   case OP_CONSTANT:
     return constantInstruction("OP_CONSTANT", chunk, offset);
+  case OP_CONSTANT_LONG:
+    return constantLongInstruction("OP_CONSTANT_LONG", chunk, offset);
   case OP_RETURN:
     return simpleInstruction("OP_RETURN", offset);
   default:

@@ -1,14 +1,24 @@
 #include "chunk.h"
 #include "debug.h"
+#include "vm.h"
+#include <stdio.h>
 
 int main() {
+  initVM();
   Chunk chunk;
   initChunk(&chunk);
-  int constantIndex = addConstant(&chunk, 1.2);
-  writeChunk(&chunk, OP_CONSTANT, 123);
-  writeChunk(&chunk, constantIndex, 123);
-  writeChunk(&chunk, OP_RETURN, 123);
+
+  for (int i = 0; i < 300; i++) {
+    Value value = i * 2.0;
+    writeConstant(&chunk, value, 123);
+  }
+
+  printf("%d", chunk.lines[0].runLength);
+
+  writeChunk(&chunk, OP_RETURN, 124);
   disassembleChunk(&chunk, "test chunk");
+  interpret(&chunk);
+  freeVM();
   freeChunk(&chunk);
   return 0;
 }
