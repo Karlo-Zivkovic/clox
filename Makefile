@@ -6,7 +6,7 @@ CFLAGS = -Wall -Wextra -g
 TARGET = main
 
 # Source Files
-SRCS = main.c chunk.c memory.c debug.c value.c
+SRCS = main.c chunk.c memory.c debug.c value.c vm.c
 
 # Default Rule
 all: $(TARGET)
