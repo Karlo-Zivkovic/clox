@@ -1,6 +1,7 @@
 #include "vm.h"
 #include "chunk.h"
 #include "common.h"
+#include "compiler.h"
 #include "debug.h"
 #include "memory.h"
 #include "value.h"
@@ -22,7 +23,11 @@ void initVM() {
   resetStack();
 }
 
-void freeVM() {}
+void freeVM() {
+  FREE_ARRAY(Value, vm.stack, (Value)(vm.stackTop - vm.stack));
+  initVM();
+}
+
 void push(Value value) {
   if (vm.stackTop - vm.stack == vm.stackCapacity) {
     size_t oldSize = vm.stackCapacity;
@@ -95,8 +100,7 @@ static InterpretResult run() {
   }
 }
 
-InterpretResult interpret(Chunk *chunk) {
-  vm.chunk = chunk;
-  vm.ip = vm.chunk->code;
-  return run();
+InterpretResult interpret(const char *source) {
+  compile(source);
+  return INTERPRET_OK;
 }
