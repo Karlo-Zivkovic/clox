@@ -2,16 +2,35 @@
 #include "chunk.h"
 #include "common.h"
 #include "debug.h"
+#include "memory.h"
 #include "value.h"
 #include <stdio.h>
+#include <stdlib.h>
 
 VM vm;
 
 static void resetStack() { vm.stackTop = vm.stack; }
 
-void initVM() { resetStack(); }
+void initVM() {
+  vm.stackCapacity = STACK_INIT;
+  vm.stack = malloc(sizeof(Value) * vm.stackCapacity);
+
+  if (!vm.stack) {
+    fprintf(stderr, "Failed to allocate initial stack memory.\n");
+    exit(1);
+  }
+  resetStack();
+}
+
 void freeVM() {}
 void push(Value value) {
+  if (vm.stackTop - vm.stack == vm.stackCapacity) {
+    size_t oldSize = vm.stackCapacity;
+    size_t newCapacity = vm.stackCapacity * 2;
+    vm.stack = GROW_ARRAY(Value, vm.stack, oldSize, newCapacity);
+    vm.stackCapacity = newCapacity;
+    vm.stackTop = vm.stack + oldSize;
+  }
   *vm.stackTop = value;
   vm.stackTop++;
 }
@@ -41,8 +60,8 @@ static InterpretResult run() {
     disassembleInstruction(vm.chunk, (int)(vm.ip - vm.chunk->code));
 
 #endif
-    uint8_t instruction = READ_BYTE();
-    switch (instruction) {
+    uint8_t instruction;
+    switch (instruction = READ_BYTE()) {
     case OP_CONSTANT: {
       Value constant = READ_CONSTANT();
       push(constant);
@@ -61,7 +80,7 @@ static InterpretResult run() {
       BINARY_OP(/);
       break;
     case OP_NEGATE: {
-      push(-pop());
+      vm.stackTop[-1] = -vm.stackTop[-1];
       break;
     }
     case OP_RETURN: {
