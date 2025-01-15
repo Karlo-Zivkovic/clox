@@ -1,6 +1,5 @@
 #include "value.h"
 #include "memory.h"
-#include <stdint.h>
 #include <stdio.h>
 
 void initValueArray(ValueArray *array) {
@@ -20,7 +19,7 @@ void writeValueArray(ValueArray *array, Value value) {
   array->count++;
 }
 
-void printValue(Value value) { printf("%g", value); }
+void printValue(Value value) { printf("%g", AS_NUMBER(value)); }
 
 void freeValueArray(ValueArray *array) {
   FREE_ARRAY(Value, array->values, array->capacity);
