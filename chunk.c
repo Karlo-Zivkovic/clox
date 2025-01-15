@@ -7,8 +7,8 @@ void initChunk(Chunk *chunk) {
   chunk->count = 0;
   chunk->capacity = 0;
   chunk->code = NULL;
-  chunk->capacity = 0;
-  chunk->count = 0;
+  chunk->linesCapacity = 0;
+  chunk->linesCount = 0;
   chunk->lines = NULL;
   initValueArray(&chunk->constants);
 }
