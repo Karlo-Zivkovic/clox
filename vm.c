@@ -5,6 +5,7 @@
 #include "debug.h"
 #include "memory.h"
 #include "object.h"
+#include "table.h"
 #include "value.h"
 #include <stdarg.h>
 #include <stdio.h>
@@ -30,6 +31,7 @@ static void runtimeError(const char *format, ...) {
 
 void initVM() {
   vm.objects = NULL;
+  initTable(&vm.strings);
   vm.stackCapacity = STACK_INIT;
   vm.stack = malloc(sizeof(Value) * vm.stackCapacity);
 
@@ -41,6 +43,7 @@ void initVM() {
 }
 
 void freeVM() {
+  freeTable(&vm.strings);
   freeObjects();
   FREE_ARRAY(Value, vm.stack, (size_t)(vm.stackTop - vm.stack));
   initVM();
