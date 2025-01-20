@@ -12,6 +12,7 @@ typedef struct {
   Value *stack;
   int stackCapacity;
   Value *stackTop;
+  // Storing every string so there is no copying the same string twice
   Table strings;
   Obj *objects;
   Table globals;

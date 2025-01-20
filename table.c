@@ -63,7 +63,7 @@ static void adjustCapacity(Table *table, int capacity) {
     entries[i].key = NULL;
     entries[i].value = NIL_VAL;
   }
-
+  // Beacuse of the tombstones, we have to re-do the count
   table->count = 0;
   for (int i = 0; i < table->capacity; i++) {
     Entry *entry = &table->entries[i];
