@@ -286,20 +286,20 @@ static void string(bool canAssign) {
 
 static void namedVariable(Token name, bool canAssign) {
   uint8_t getOp, setOp;
-  int arg = resolveLocal(current, &name);
-  if (arg != -1) {
+  int index = resolveLocal(current, &name);
+  if (index != -1) {
     getOp = OP_GET_LOCAL;
     setOp = OP_SET_LOCAL;
   } else {
-    arg = identifierConstant(&name);
+    index = identifierConstant(&name);
     getOp = OP_GET_GLOBAL;
     setOp = OP_SET_GLOBAL;
   }
   if (canAssign && match(TOKEN_EQUAL)) {
     expression();
-    emitBytes(setOp, (uint8_t)arg);
+    emitBytes(setOp, (uint8_t)index);
   } else {
-    emitBytes(getOp, (uint8_t)arg);
+    emitBytes(getOp, (uint8_t)index);
   }
 }
 
@@ -467,12 +467,12 @@ static void markInitialized() {
   current->locals[current->localCount - 1].depth = current->scopeDepth;
 }
 
-static void defineVariable(uint8_t global) {
+static void defineVariable(uint8_t globalIndex) {
   if (current->scopeDepth > 0) {
     markInitialized();
     return;
   }
-  emitBytes(OP_DEFINE_GLOBAL, global);
+  emitBytes(OP_DEFINE_GLOBAL, globalIndex);
 }
 
 static void and_(bool canAssign) {
@@ -484,14 +484,14 @@ static void and_(bool canAssign) {
 }
 
 static void varDeclaration() {
-  uint8_t globalIndex = parseVariable("Expect variable name.");
+  uint8_t variableIndex = parseVariable("Expect variable name.");
   if (match(TOKEN_EQUAL)) {
     expression();
   } else {
     emitByte(OP_NIL);
   }
   consume(TOKEN_SEMICOLON, "Expect ';' after variable declaration.");
-  defineVariable(globalIndex);
+  defineVariable(variableIndex);
 }
 
 static void expressionStatement() {
